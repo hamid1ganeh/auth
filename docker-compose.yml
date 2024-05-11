@@ -1,0 +1,62 @@
+version: "3.7"
+services:
+  app:
+    build:
+      args:
+        user: sammy
+        uid: 1000
+      context: ./
+      dockerfile: Dockerfile
+    image: auth
+    container_name: auth-app
+    restart: unless-stopped
+    working_dir: /var/www/
+    volumes:
+      - ./:/var/www
+    networks:
+      - auth
+
+  db:
+    image: mysql:latest
+    container_name: auth-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - ./docker/mysql:/docker-entrypoint-initdb.d
+    networks:
+      - auth
+
+  nginx:
+    image: nginx:alpine
+    container_name: auth-nginx
+    restart: unless-stopped
+    ports:
+      - 1371:80
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx:/etc/nginx/conf.d/
+    networks:
+      - auth
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: auth-phpmyadmin
+    links:
+      - db
+    environment:
+        PMA_HOST: db
+        PMA_PORT: 3306
+    ports:
+        - 8082:80
+    networks:
+        - auth
+
+networks:
+  auth:
+    driver: bridge
