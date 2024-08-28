@@ -8,7 +8,7 @@ services:
       context: ./
       dockerfile: Dockerfile
     image: auth
-    container_name: auth-app
+    container_name: parleman-app
     restart: unless-stopped
     working_dir: /var/www/
     volumes:
@@ -18,7 +18,7 @@ services:
 
   db:
     image: mysql:latest
-    container_name: auth-mysql
+    container_name: parleman-mysql
     restart: unless-stopped
     environment:
       MYSQL_DATABASE: ${DB_DATABASE}
@@ -34,7 +34,7 @@ services:
 
   nginx:
     image: nginx:alpine
-    container_name: auth-nginx
+    container_name: parleman-nginx
     restart: unless-stopped
     ports:
       - 1371:80
@@ -46,14 +46,14 @@ services:
 
   phpmyadmin:
     image: phpmyadmin:latest
-    container_name: auth-phpmyadmin
+    container_name: parleman-phpmyadmin
     links:
       - db
     environment:
         PMA_HOST: db
         PMA_PORT: 3306
     ports:
-        - 8082:80
+        - 8085:80
     networks:
         - auth
 
